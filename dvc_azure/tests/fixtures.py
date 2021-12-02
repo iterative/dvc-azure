@@ -2,6 +2,7 @@ import os
 import uuid
 
 import pytest
+from funcy import suppress
 
 from .cloud import Azure
 
@@ -54,7 +55,7 @@ def azure_server(docker_compose, docker_services):
 @pytest.fixture
 def make_azure(azure_server):
     def _make_azure():
-        from azure.core.exceptions import ResourceNotFoundError
+        from azure.core.exceptions import ResourceExistsError
 
         url = f"azure://{TEST_AZURE_CONTAINER}/{uuid.uuid4()}"
         ret = Azure(url, connection_string=azure_server)
@@ -62,9 +63,7 @@ def make_azure(azure_server):
         container = ret.service_client.get_container_client(
             TEST_AZURE_CONTAINER
         )
-        try:  # verify that container exists
-            container.get_container_properties()
-        except ResourceNotFoundError:
+        with suppress(ResourceExistsError):
             container.create_container()
 
         return ret

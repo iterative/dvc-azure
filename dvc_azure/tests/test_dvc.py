@@ -13,6 +13,7 @@ from dvc.testing.test_workspace import (  # noqa, pylint: disable=unused-import
 def cloud_name():
     return "azure"
 
+
 @pytest.fixture
 def remote(make_remote, cloud_name):
     yield make_remote(name="upstream", typ=cloud_name)
@@ -25,30 +26,29 @@ def workspace(make_workspace, cloud_name):
 
 @pytest.fixture
 def stage_md5():
-    raise NotImplementedError
+    return None
 
 
 @pytest.fixture
 def is_object_storage():
-    raise NotImplementedError
+    pytest.skip("https://github.com/iterative/dvc/issues/5521")
 
 
 @pytest.fixture
 def dir_md5():
-    raise NotImplementedError
+    return None
 
 
 @pytest.fixture
 def hash_name():
-    raise NotImplementedError
+    pytest.skip("not supported by azure")
 
 
 @pytest.fixture
 def hash_value():
-    raise NotImplementedError
+    pytest.skip("not supported by azure")
 
 
 @pytest.fixture
 def dir_hash_value(dir_md5):
-    raise NotImplementedError
-
+    pytest.skip("not supported by azure")

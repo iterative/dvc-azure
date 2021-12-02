@@ -12,6 +12,11 @@ class Azure(Cloud, CloudURLInfo):
         super().__init__(url)
         self.opts = kwargs
 
+    def __truediv__(self, key):
+        ret = super().__truediv__(key)
+        ret.opts = self.opts
+        return ret
+
     @cached_property
     def service_client(self):
         # pylint: disable=no-name-in-module

@@ -51,6 +51,10 @@ warn_redundant_casts = true
 warn_unreachable = true
 files = ["dvc_azure"]
 
+[[tool.mypy.overrides]]
+module = ["azure.*"]
+ignore_errors = true
+
 [tool.pylint.master]
 extension-pkg-whitelist = ["pygit2"]
 init-hook = "import sys; sys.path.append(str('tests'))"

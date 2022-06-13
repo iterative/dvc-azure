@@ -1,0 +1,6 @@
+{
+  "enabledManagers": ["docker-compose"],
+  "docker-compose": {
+    "fileMatch": ["^dvc_azure/tests/docker-compose.yaml$"]
+  }
+}

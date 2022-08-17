@@ -2,12 +2,11 @@ import logging
 import os
 import threading
 
+from dvc_objects.fs.base import ObjectFileSystem
+from dvc_objects.fs.errors import AuthError
 from fsspec.asyn import fsspec_loop
 from fsspec.utils import infer_storage_options
 from funcy import cached_property, memoize, wrap_prop
-
-from dvc_objects.fs.base import ObjectFileSystem
-from dvc_objects.fs.errors import AuthError
 
 logger = logging.getLogger(__name__)
 _DEFAULT_CREDS_STEPS = (

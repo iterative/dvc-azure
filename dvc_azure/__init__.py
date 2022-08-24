@@ -1,12 +1,15 @@
 import logging
 import os
 import threading
+from typing import Any, Dict
 
 from dvc_objects.fs.base import ObjectFileSystem
 from dvc_objects.fs.errors import AuthError
 from fsspec.asyn import fsspec_loop
 from fsspec.utils import infer_storage_options
 from funcy import cached_property, memoize, wrap_prop
+
+from .path import AzurePath
 
 logger = logging.getLogger(__name__)
 _DEFAULT_CREDS_STEPS = (
@@ -43,6 +46,13 @@ class AzureFileSystem(ObjectFileSystem):
         "azure-identity": "azure.identity",
     }
 
+    @cached_property
+    def path(self) -> AzurePath:
+        def _getcwd():
+            return self.fs.root_marker
+
+        return AzurePath(self.sep, getcwd=_getcwd)
+
     @classmethod
     def _strip_protocol(cls, path: str):
         opts = infer_storage_options(path)
@@ -55,11 +65,21 @@ class AzureFileSystem(ObjectFileSystem):
         return "azure://" + path.lstrip("/")
 
     @staticmethod
-    def _get_kwargs_from_urls(urlpath):
+    def _get_kwargs_from_urls(urlpath: str) -> Dict[str, Any]:
+        ret = {}
         ops = infer_storage_options(urlpath)
         if "host" in ops:
-            return {"bucket": ops["host"]}
-        return {}
+            ret["bucket"] = ops["host"]
+
+        url_query = ops.get("url_query")
+        if url_query is not None:
+            from urllib.parse import parse_qs
+
+            parsed = parse_qs(url_query)
+            if "versionid" in parsed:
+                ret["version_aware"] = True
+
+        return ret
 
     def _prepare_credentials(self, **config):
         from azure.identity.aio import DefaultAzureCredential
@@ -68,6 +88,7 @@ class AzureFileSystem(ObjectFileSystem):
         logging.getLogger("azure.identity.aio").setLevel(logging.ERROR)
 
         login_info = {}
+        login_info["version_aware"] = config.get("version_aware", False)
         login_info["connection_string"] = config.get(
             "connection_string",
             _az_config().get("storage", "connection_string", None),

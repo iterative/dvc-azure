@@ -50,9 +50,10 @@ warn_no_return = true
 warn_redundant_casts = true
 warn_unreachable = true
 files = ["dvc_azure"]
+exclude = "dvc_azure/_spec.py"
 
 [[tool.mypy.overrides]]
-module = ["azure.*"]
+module = ["azure.*", "dvc_azure._spec"]
 ignore_errors = true
 
 [tool.pylint.master]

@@ -162,8 +162,9 @@ class AzureFileSystem(ObjectFileSystem):
     @wrap_prop(threading.Lock())
     @cached_property
     def fs(self):
-        from adlfs import AzureBlobFileSystem
         from azure.core.exceptions import AzureError
+
+        from ._spec import AzureBlobFileSystem
 
         try:
             return AzureBlobFileSystem(**self.fs_args)

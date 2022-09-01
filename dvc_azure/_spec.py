@@ -60,7 +60,7 @@ _ROOT_PATH = "/"
 def match_blob_version(blob, version_id: Optional[str]):
     return (
         version_id is None
-        and ("version_id" not in blob or blob["is_current_version"])
+        and (blob.get("version_id") is None or blob["is_current_version"])
     ) or (version_id is not None and blob["version_id"] == version_id)
 
 

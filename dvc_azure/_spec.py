@@ -61,7 +61,7 @@ def match_blob_version(blob, version_id: Optional[str]):
     return (
         version_id is None
         and (blob.get("version_id") is None or blob["is_current_version"])
-    ) or (version_id is not None and blob["version_id"] == version_id)
+    ) or (version_id is not None and blob.get("version_id") == version_id)
 
 
 async def filter_blobs(

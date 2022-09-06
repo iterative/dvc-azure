@@ -38,5 +38,7 @@ class AzurePath(Path):
         path, path_version_id = self.split_version(path)
         versions = {ver for ver in (version_id, path_version_id) if ver}
         if len(versions) > 1:
-            raise ValueError("Path version mismatch: '{path}', '{version_id}'")
+            raise ValueError(
+                f"Path version mismatch: '{path}', '{version_id}'"
+            )
         return path, (versions.pop() if versions else None)

@@ -57,7 +57,11 @@ class AzureFileSystem(ObjectFileSystem):
     def _strip_protocol(cls, path: str):
         opts = infer_storage_options(path)
         if opts.get("host"):
-            return "{host}{path}".format(**opts)
+            if "url_query" in opts:
+                query = f"?{opts['url_query']}"
+            else:
+                query = ""
+            return f"{opts['host']}{opts['path']}{query}"
 
         return _az_config().get("storage", "container_name", None)
 

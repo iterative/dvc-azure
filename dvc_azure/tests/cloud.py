@@ -53,7 +53,11 @@ class Azure(Cloud, CloudURLInfo):
         raise NotImplementedError
 
     def is_dir(self):
-        raise NotImplementedError
+        path = self.path.rstrip("/") + "/"
+        cc = self.service_client.get_container_client(self.bucket)
+        for _ in cc.list_blobs(name_starts_with=path):
+            return True
+        return False
 
     def exists(self):
         raise NotImplementedError

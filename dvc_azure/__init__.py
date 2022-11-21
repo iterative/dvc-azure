@@ -176,3 +176,7 @@ class AzureFileSystem(ObjectFileSystem):
                 f"Authentication to Azure Blob Storage via {self.login_method}"
                 " failed."
             ) from e
+
+    def put_file(self, *args, **kwargs) -> None:
+        kwargs["overwrite"] = True
+        super().put_file(*args, **kwargs)

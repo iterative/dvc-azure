@@ -1,6 +1,6 @@
 {
   "template": "https://github.com/iterative/cookiecutter-dvc-plugin",
-  "commit": "7b38e245b247bee0a87ced7307f8f72d6ccef267",
+  "commit": "030ab84c63813572b4d8f9043faa9b8c65d14842",
   "checkout": null,
   "context": {
     "cookiecutter": {

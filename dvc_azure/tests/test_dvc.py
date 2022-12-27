@@ -5,6 +5,7 @@ from dvc.testing.api_tests import (  # noqa, pylint: disable=unused-import
 from dvc.testing.remote_tests import (  # noqa, pylint: disable=unused-import
     TestRemote,
 )
+from dvc.testing.workspace_tests import TestAdd as _TestAdd
 from dvc.testing.workspace_tests import (  # noqa, pylint: disable=unused-import
     TestGetUrl,
 )
@@ -29,9 +30,6 @@ def workspace(make_workspace):
     yield make_workspace(name="workspace", typ="azure")
 
 
-@pytest.mark.xfail(
-    reason="waiting for https://github.com/fsspec/adlfs/pull/333"
-)
 class TestImport(_TestImport):
     @pytest.fixture
     def stage_md5(self):
@@ -44,3 +42,17 @@ class TestImport(_TestImport):
     @pytest.fixture
     def dir_md5(self):
         return "ec602a6ba97b2dd07bd6d2cd89674a60.dir"
+
+
+class TestAdd(_TestAdd):
+    @pytest.fixture
+    def hash_name(self):
+        raise NotImplementedError
+
+    @pytest.fixture
+    def hash_value(self):
+        raise NotImplementedError
+
+    @pytest.fixture
+    def dir_hash_value(self):
+        raise NotImplementedError

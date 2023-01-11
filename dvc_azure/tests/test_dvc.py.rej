@@ -1,0 +1,35 @@
+diff a/dvc_azure/tests/test_dvc.py b/dvc_azure/tests/test_dvc.py	(rejected hunks)
+@@ -21,12 +21,12 @@ def cloud(make_cloud):
+ 
+ 
+ @pytest.fixture
+-def remote(make_remote, cloud_name):
++def remote(make_remote):
+     yield make_remote(name="upstream", typ="azure")
+ 
+ 
+ @pytest.fixture
+-def workspace(make_workspace, cloud_name):
++def workspace(make_workspace):
+     yield make_workspace(name="workspace", typ="azure")
+ 
+ 
+@@ -48,15 +48,13 @@ class TestImport(_TestImport):
+ 
+ class TestAdd(_TestAdd):
+     @pytest.fixture
+-    def hash_name():
++    def hash_name(self):
+         raise NotImplementedError
+ 
+-
+     @pytest.fixture
+-    def hash_value():
++    def hash_value(self):
+         raise NotImplementedError
+ 
+-
+     @pytest.fixture
+-    def dir_hash_value(dir_md5):
++    def dir_hash_value(self):
+         raise NotImplementedError

@@ -6,11 +6,12 @@ from funcy import cached_property
 class Azure(Cloud, CloudURLInfo):
 
     IS_OBJECT_STORAGE = True
-    CONNECTION_STRING = None
 
     def __init__(self, url, **kwargs):
         super().__init__(url)
         self.opts = kwargs
+        if "connection_string" not in kwargs:
+            raise ValueError("Must provide connection_string")
 
     def __truediv__(self, key):
         ret = super().__truediv__(key)
@@ -23,7 +24,7 @@ class Azure(Cloud, CloudURLInfo):
         from azure.storage.blob import BlobServiceClient
 
         service_client = BlobServiceClient.from_connection_string(
-            self.CONNECTION_STRING
+            self.opts["connection_string"]
         )
 
         return service_client

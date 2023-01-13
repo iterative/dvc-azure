@@ -29,9 +29,6 @@ def workspace(make_workspace):
     yield make_workspace(name="workspace", typ="azure")
 
 
-@pytest.mark.xfail(
-    reason="waiting for https://github.com/fsspec/adlfs/pull/333"
-)
 class TestImport(_TestImport):
     @pytest.fixture
     def stage_md5(self):

@@ -5,7 +5,6 @@ from typing import Any, Dict
 
 from dvc_objects.fs.base import ObjectFileSystem
 from dvc_objects.fs.errors import AuthError
-from fsspec.asyn import fsspec_loop
 from fsspec.utils import infer_storage_options
 from funcy import cached_property, memoize, wrap_prop
 
@@ -124,22 +123,21 @@ class AzureFileSystem(ObjectFileSystem):
             and not any_secondary
             and not config.get("allow_anonymous_login", False)
         ):
-            with fsspec_loop():
-                login_info["credential"] = DefaultAzureCredential(
-                    exclude_interactive_browser_credential=False,
-                    exclude_environment_credential=config.get(
-                        "exclude_environment_credential", False
-                    ),
-                    exclude_visual_studio_code_credential=config.get(
-                        "exclude_visual_studio_code_credential", False
-                    ),
-                    exclude_shared_token_cache_credential=config.get(
-                        "exclude_shared_token_cache_credential", False
-                    ),
-                    exclude_managed_identity_credential=config.get(
-                        "exclude_managed_identity_credential", False
-                    ),
-                )
+            login_info["credential"] = DefaultAzureCredential(
+                exclude_interactive_browser_credential=False,
+                exclude_environment_credential=config.get(
+                    "exclude_environment_credential", False
+                ),
+                exclude_visual_studio_code_credential=config.get(
+                    "exclude_visual_studio_code_credential", False
+                ),
+                exclude_shared_token_cache_credential=config.get(
+                    "exclude_shared_token_cache_credential", False
+                ),
+                exclude_managed_identity_credential=config.get(
+                    "exclude_managed_identity_credential", False
+                ),
+            )
 
         for login_method, required_keys in [  # noqa
             ("connection string", ["connection_string"]),

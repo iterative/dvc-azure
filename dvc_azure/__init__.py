@@ -178,3 +178,7 @@ class AzureFileSystem(ObjectFileSystem):
     def put_file(self, *args, **kwargs) -> None:
         kwargs["overwrite"] = True
         super().put_file(*args, **kwargs)
+
+    def rm(self, *args, **kwargs) -> None:
+        kwargs["expand_path"] = False
+        super().rm(*args, **kwargs)

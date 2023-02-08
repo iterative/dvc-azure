@@ -164,8 +164,9 @@ class AzureFileSystem(ObjectFileSystem):
     @wrap_prop(threading.Lock())
     @cached_property
     def fs(self):
-        from adlfs import AzureBlobFileSystem
         from azure.core.exceptions import AzureError
+
+        from .spec import AzureBlobFileSystem
 
         try:
             return AzureBlobFileSystem(**self.fs_args)
@@ -174,11 +175,3 @@ class AzureFileSystem(ObjectFileSystem):
                 f"Authentication to Azure Blob Storage via {self.login_method}"
                 " failed."
             ) from e
-
-    def put_file(self, *args, **kwargs) -> None:
-        kwargs["overwrite"] = True
-        super().put_file(*args, **kwargs)
-
-    def rm(self, *args, **kwargs) -> None:
-        kwargs["expand_path"] = False
-        super().rm(*args, **kwargs)

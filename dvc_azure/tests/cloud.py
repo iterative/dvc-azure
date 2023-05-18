@@ -1,3 +1,6 @@
+import os
+import uuid
+
 from dvc.testing.cloud import Cloud
 from dvc.testing.path_info import CloudURLInfo
 from funcy import cached_property
@@ -66,3 +69,9 @@ class Azure(Cloud, CloudURLInfo):
     @property
     def config(self):
         return {"url": self.url, **self.opts}
+
+    @staticmethod
+    def get_storagepath():
+        path = os.environ.get("DVC_TEST_AZURE_PATH")
+        assert path
+        return path + "/" + "dvc_test_caches" + "/" + str(uuid.uuid4())

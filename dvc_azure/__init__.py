@@ -115,9 +115,15 @@ class AzureFileSystem(ObjectFileSystem):
                 "account_name or connection_string."
             )
 
-        any_secondary = any(
-            value for key, value in login_info.items() if key != "account_name"
+        secondaries = (
+            "connection_string",
+            "account_key",
+            "sas_token",
+            "tenant_id",
+            "client_id",
+            "client_secret",
         )
+        any_secondary = any(login_info[name] for name in secondaries)
         if (
             login_info["account_name"]
             and not any_secondary

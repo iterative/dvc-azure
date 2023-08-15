@@ -42,6 +42,8 @@ htmlcov/
 .tox/
 .nox/
 .coverage
+
+.DS_Store
 .coverage.*
 .cache
 nosetests.xml

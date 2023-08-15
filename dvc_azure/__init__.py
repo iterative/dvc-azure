@@ -85,87 +85,37 @@ class AzureFileSystem(ObjectFileSystem):
         return ret
 
     def _prepare_credentials(self, **config):
-        from azure.identity.aio import DefaultAzureCredential
+        az_config = _az_config()
 
-        # Disable spam from failed cred types for DefaultAzureCredential
-        logging.getLogger("azure.identity.aio").setLevel(logging.ERROR)
-
-        login_info = {}
-        login_info["version_aware"] = config.get("version_aware", False)
-        login_info["connection_string"] = config.get(
-            "connection_string",
-            _az_config().get("storage", "connection_string", None),
-        )
-        login_info["account_name"] = config.get(
-            "account_name", _az_config().get("storage", "account", None)
-        )
-        login_info["account_key"] = config.get(
-            "account_key", _az_config().get("storage", "key", None)
-        )
-        login_info["sas_token"] = config.get(
-            "sas_token", _az_config().get("storage", "sas_token", None)
-        )
-        login_info["tenant_id"] = config.get("tenant_id")
-        login_info["client_id"] = config.get("client_id")
-        login_info["client_secret"] = config.get("client_secret")
-
-        if not (login_info["account_name"] or login_info["connection_string"]):
-            raise AzureAuthError(
-                "Authentication to Azure Blob Storage requires either "
-                "account_name or connection_string."
-            )
-
-        secondaries = (
-            "connection_string",
-            "account_key",
-            "sas_token",
-            "tenant_id",
-            "client_id",
-            "client_secret",
-        )
-        any_secondary = any(login_info[name] for name in secondaries)
-        if (
-            login_info["account_name"]
-            and not any_secondary
-            and not config.get("allow_anonymous_login", False)
-        ):
-            login_info["credential"] = DefaultAzureCredential(
-                exclude_interactive_browser_credential=False,
-                exclude_environment_credential=config.get(
-                    "exclude_environment_credential", False
-                ),
-                exclude_visual_studio_code_credential=config.get(
-                    "exclude_visual_studio_code_credential", False
-                ),
-                exclude_shared_token_cache_credential=config.get(
-                    "exclude_shared_token_cache_credential", False
-                ),
-                exclude_managed_identity_credential=config.get(
-                    "exclude_managed_identity_credential", False
-                ),
-            )
-
-        for login_method, required_keys in [  # noqa
-            ("connection string", ["connection_string"]),
-            (
-                "AD service principal",
-                ["tenant_id", "client_id", "client_secret"],
+        defaults = {
+            "version_aware": None,
+            "connection_string": az_config.get(
+                "storage", "connection_string", None
             ),
-            ("account key", ["account_name", "account_key"]),
-            ("SAS token", ["account_name", "sas_token"]),
-            (
-                f"default credentials ({_DEFAULT_CREDS_STEPS})",
-                ["account_name", "credential"],
-            ),
-            ("anonymous login", ["account_name"]),
-        ]:
-            if all(login_info.get(key) is not None for key in required_keys):
-                break
-        else:
-            login_method = None
+            "account_name": az_config.get("storage", "account", None),
+            "account_key": az_config.get("storage", "key", None),
+            "sas_token": az_config.get("storage", "sas_token", None),
+            "tenant_id": None,
+            "client_id": None,
+            "client_secret": None,
+            "exclude_environment_credential": None,
+            "exclude_shared_token_cache_credential": None,
+            "exclude_managed_identity_credential": None,
+            # NOTE: these two are True by default in DefaultAzureCredential,
+            # so we need to explicitly default to False here.
+            "exclude_interactive_browser_credential": False,
+            "exclude_visual_studio_code_credential": False,
+        }
 
-        self.login_method = login_method
-        return login_info
+        ret = {}
+        for name, default in defaults.items():
+            value = config.get(name, default)
+            if value is not None:
+                ret[name] = value
+
+        ret["anon"] = config.get("allow_anonymous_login", False)
+
+        return ret
 
     @wrap_prop(threading.Lock())
     @cached_property
@@ -174,10 +124,12 @@ class AzureFileSystem(ObjectFileSystem):
 
         from .spec import AzureBlobFileSystem
 
+        # Disable spam from failed cred types for DefaultAzureCredential
+        logging.getLogger("azure.identity.aio").setLevel(logging.ERROR)
+
         try:
             return AzureBlobFileSystem(**self.fs_args)
         except (ValueError, AzureError) as e:
             raise AzureAuthError(
-                f"Authentication to Azure Blob Storage via {self.login_method}"
-                " failed."
+                "Authentication to Azure Blob Storage failed"
             ) from e

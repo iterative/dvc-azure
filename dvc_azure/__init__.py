@@ -145,7 +145,11 @@ class AzureFileSystem(ObjectFileSystem):
                 ),
             )
 
-        for login_method, required_keys in [  # noqa
+        return login_info
+
+    @cached_property
+    def _login_method(self):
+        for method, required_keys in [  # noqa
             ("connection string", ["connection_string"]),
             (
                 "AD service principal",
@@ -159,13 +163,9 @@ class AzureFileSystem(ObjectFileSystem):
             ),
             ("anonymous login", ["account_name"]),
         ]:
-            if all(login_info.get(key) is not None for key in required_keys):
-                break
-        else:
-            login_method = None
-
-        self.login_method = login_method
-        return login_info
+            if all(self.fs_args.get(key) is not None for key in required_keys):
+                return method
+        return None
 
     @wrap_prop(threading.Lock())
     @cached_property
@@ -178,6 +178,6 @@ class AzureFileSystem(ObjectFileSystem):
             return AzureBlobFileSystem(**self.fs_args)
         except (ValueError, AzureError) as e:
             raise AzureAuthError(
-                f"Authentication to Azure Blob Storage via {self.login_method}"
-                " failed."
+                "Authentication to Azure Blob Storage via "
+                f"{self._login_method} failed."
             ) from e

@@ -1,12 +1,13 @@
 import logging
 import os
 import threading
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
+from dvc.utils.objects import cached_property
 from dvc_objects.fs.base import ObjectFileSystem
 from dvc_objects.fs.errors import AuthError
 from fsspec.utils import infer_storage_options
-from funcy import cached_property, memoize, wrap_prop
+from funcy import memoize, wrap_prop
 
 from .path import AzurePath
 
@@ -44,6 +45,10 @@ class AzureFileSystem(ObjectFileSystem):
         "knack": "knack",
         "azure-identity": "azure.identity",
     }
+
+    def __init__(self, fs=None, **kwargs: Any):
+        super().__init__(fs, **kwargs)
+        self.login_method: Optional[str] = None
 
     @cached_property
     def path(self) -> AzurePath:

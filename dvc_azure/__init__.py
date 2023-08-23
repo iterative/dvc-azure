@@ -169,7 +169,7 @@ class AzureFileSystem(ObjectFileSystem):
 
     @wrap_prop(threading.Lock())
     @cached_property
-    def fs(self):
+    def fs(self):  # pylint: disable=invalid-overridden-method
         from azure.core.exceptions import AzureError
 
         from .spec import AzureBlobFileSystem

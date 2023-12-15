@@ -1,15 +1,14 @@
 import logging
 import os
 import threading
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
+from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 from dvc.utils.objects import cached_property
 from dvc_objects.fs.base import ObjectFileSystem
 from dvc_objects.fs.errors import AuthError
 from fsspec.utils import infer_storage_options
-from funcy import memoize, wrap_prop
-
-from .path import AzurePath
+from funcy import first, memoize, wrap_prop
 
 logger = logging.getLogger(__name__)
 _DEFAULT_CREDS_STEPS = (
@@ -40,6 +39,7 @@ def _az_config():
 class AzureFileSystem(ObjectFileSystem):
     protocol = "azure"
     PARAM_CHECKSUM = "etag"
+    VERSION_ID_KEY = "versionid"
     REQUIRES = {
         "adlfs": "adlfs",
         "knack": "knack",
@@ -50,12 +50,46 @@ class AzureFileSystem(ObjectFileSystem):
         super().__init__(fs, **kwargs)
         self.login_method: Optional[str] = None
 
-    @cached_property
-    def path(self) -> AzurePath:
-        def _getcwd():
-            return self.fs.root_marker
+    def getcwd(self):
+        return self.fs.root_marker
 
-        return AzurePath(self.sep, getcwd=_getcwd)
+    @classmethod
+    def split_version(cls, path: str) -> Tuple[str, Optional[str]]:
+        parts = list(urlsplit(path))
+        query = parse_qs(parts[3])
+        if cls.VERSION_ID_KEY in query:
+            version_id = first(query[cls.VERSION_ID_KEY])
+            del query[cls.VERSION_ID_KEY]
+            parts[3] = urlencode(query)
+        else:
+            version_id = None
+        return urlunsplit(parts), version_id
+
+    @classmethod
+    def join_version(cls, path: str, version_id: Optional[str]) -> str:
+        parts = list(urlsplit(path))
+        query = parse_qs(parts[3])
+        if cls.VERSION_ID_KEY in query:
+            raise ValueError("path already includes a version query")
+        parts[3] = f"versionid={version_id}" if version_id else ""
+        return urlunsplit(parts)
+
+    @classmethod
+    def version_path(cls, path: str, version_id: Optional[str]) -> str:
+        path, _ = cls.split_version(path)
+        return cls.join_version(path, version_id)
+
+    @classmethod
+    def coalesce_version(
+        cls, path: str, version_id: Optional[str]
+    ) -> Tuple[str, Optional[str]]:
+        path, path_version_id = cls.split_version(path)
+        versions = {ver for ver in (version_id, path_version_id) if ver}
+        if len(versions) > 1:
+            raise ValueError(
+                f"Path version mismatch: '{path}', '{version_id}'"
+            )
+        return path, (versions.pop() if versions else None)
 
     @classmethod
     def _strip_protocol(cls, path: str):
@@ -81,8 +115,6 @@ class AzureFileSystem(ObjectFileSystem):
 
         url_query = ops.get("url_query")
         if url_query is not None:
-            from urllib.parse import parse_qs
-
             parsed = parse_qs(url_query)
             if "versionid" in parsed:
                 ret["version_aware"] = True

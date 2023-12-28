@@ -33,6 +33,10 @@ class Azure(Cloud, CloudURLInfo):
         return service_client
 
     @property
+    def container_client(self):
+        return self.service_client.get_container_client(container=self.bucket)
+
+    @property
     def blob_client(self):
         return self.service_client.get_blob_client(self.bucket, self.path)
 
@@ -42,6 +46,32 @@ class Azure(Cloud, CloudURLInfo):
 
     def write_bytes(self, contents):
         self.blob_client.upload_blob(contents, overwrite=True)
+
+    def unlink(self, missing_ok: bool = False) -> None:
+        if not self.exists():
+            if not missing_ok:
+                raise FileNotFoundError(str(self))
+            return
+        self.blob_client.delete_blob()
+
+    def rmdir(self, recursive: bool = True) -> None:
+        if not self.is_dir():
+            raise NotADirectoryError(str(self))
+
+        blobs = [
+            blob.name
+            for blob in self.container_client.list_blobs(
+                name_starts_with=(self / "").path
+            )
+        ]
+        if not blobs:
+            return
+
+        if not recursive:
+            raise OSError(f"Not recursive and directory not empty: {self}")
+
+        for blob in blobs:
+            self.container_client.delete_blob(blob)
 
     def read_bytes(self):
         stream = self.blob_client.download_blob()

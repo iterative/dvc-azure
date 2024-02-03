@@ -1,13 +1,13 @@
 import os
 import uuid
 
+from funcy import cached_property
+
 from dvc.testing.cloud import Cloud
 from dvc.testing.path_info import CloudURLInfo
-from funcy import cached_property
 
 
 class Azure(Cloud, CloudURLInfo):
-
     IS_OBJECT_STORAGE = True
 
     def __init__(self, url, **kwargs):
@@ -26,11 +26,7 @@ class Azure(Cloud, CloudURLInfo):
         # pylint: disable=no-name-in-module
         from azure.storage.blob import BlobServiceClient
 
-        service_client = BlobServiceClient.from_connection_string(
-            self.opts["connection_string"]
-        )
-
-        return service_client
+        return BlobServiceClient.from_connection_string(self.opts["connection_string"])
 
     @property
     def container_client(self):

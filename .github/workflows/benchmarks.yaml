@@ -63,7 +63,7 @@ jobs:
 
     - name: run benchmarks
       timeout-minutes: 180
-      run: pytest --dist no --benchmark-save benchmarks-azure --benchmark-group-by func --dvc-revs main,2.45.0,2.41.1,2.40.0,2.39.0,2.18.1,2.11.0 --size ${DATASET} dvc_azure/tests/benchmarks.py --dvc-install-deps azure
+      run: pytest --dist no --benchmark-save benchmarks-azure --benchmark-group-by func --dvc-revs main,2.45.0,2.41.1,2.40.0,2.39.0,2.18.1,2.11.0 --dataset ${DATASET} dvc_azure/tests/benchmarks.py --dvc-install-deps azure
 
     - name: upload raw results
       uses: actions/upload-artifact@v3

@@ -55,7 +55,8 @@ jobs:
       run: |
         brew install docker
         brew unlink colima
-        curl -L -o /usr/local/bin/colima https://github.com/abiosoft/colima/releases/download/v0.5.6/colima-Darwin-x86_64 && sudo chmod +x /usr/local/bin/colima
+        curl -L -o /usr/local/bin/colima https://github.com/abiosoft/colima/releases/download/v0.5.6/colima-Darwin-x86_64
+        sudo chmod +x /usr/local/bin/colima
         colima start
         ls -la $HOME/.colima/default/docker.sock
         sudo ln -sf $HOME/.colima/default/docker.sock /var/run/docker.sock

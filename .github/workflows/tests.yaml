@@ -49,7 +49,7 @@ jobs:
 
     # https://github.com/abiosoft/colima/issues/468
     - name: Use colima as default docker host on MacOS
-      if: matrix.os == 'macos-latest'
+      if: matrix.os == 'macos-14'
       run: |
         brew install docker
         colima start

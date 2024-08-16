@@ -28,3 +28,8 @@ def make_azure(request):
 @pytest.fixture
 def azure(make_azure):
     return make_azure()
+
+
+@pytest.fixture
+def remote(make_remote):
+    return make_remote(name="upstream", typ="azure")

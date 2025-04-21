@@ -214,6 +214,5 @@ class AzureFileSystem(ObjectFileSystem):
             return AzureBlobFileSystem(**self.fs_args)
         except (ValueError, AzureError) as e:
             raise AzureAuthError(
-                "Authentication to Azure Blob Storage via "
-                f"{self._login_method} failed."
+                f"Authentication to Azure Blob Storage via {self._login_method} failed."
             ) from e

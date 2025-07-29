@@ -33,6 +33,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
+        allow-prereleases: true
         python-version: ${{ matrix.pyv }}
 
     - uses: astral-sh/setup-uv@v6

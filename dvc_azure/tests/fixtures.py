@@ -30,7 +30,7 @@ def start_docker():
         "docker run -d -p 10000:10000 "
         f"--name {CONTAINER_NAME} "
         "mcr.microsoft.com/azure-storage/azurite "
-        "azurite-blob --loose --blobHost 0.0.0.0"
+        "azurite-blob --loose --blobHost 0.0.0.0 --skipApiVersionCheck"
     )
     subprocess.check_output(shlex.split(cmd))
     return "http://localhost:10000"
